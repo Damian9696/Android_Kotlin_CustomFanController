@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.withStyledAttributes
 import java.lang.Float.min
 import kotlin.math.cos
 import kotlin.math.min
@@ -31,6 +32,10 @@ class DialView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    private var fanSpeedLowColor = 0
+    private var fanSpeedMediumColor = 0
+    private var fanSeedMaxColor = 0
+
     private var radius = 0.0f                   // Radius of the circle.
     private var fanSpeed = FanSpeed.OFF         // The active selection.
 
@@ -47,6 +52,12 @@ class DialView @JvmOverloads constructor(
     init {
         //Enables the view to accept user input
         isClickable = true
+
+        context.withStyledAttributes(attrs, R.styleable.DialView) {
+            fanSpeedLowColor = getColor(R.styleable.DialView_fanColor1, 0)
+            fanSpeedMediumColor = getColor(R.styleable.DialView_fanColor2, 0)
+            fanSeedMaxColor = getColor(R.styleable.DialView_fanColor3, 0)
+        }
     }
 
     override fun performClick(): Boolean {
@@ -74,7 +85,13 @@ class DialView @JvmOverloads constructor(
         super.onDraw(canvas)
 
         //Set dial background color to green if selection not off
-        paint.color = if (fanSpeed == FanSpeed.OFF) Color.GRAY else Color.GREEN
+        paint.color = when (fanSpeed) {
+            FanSpeed.OFF -> Color.GRAY
+            FanSpeed.LOW -> fanSpeedLowColor
+            FanSpeed.MEDIUM -> fanSpeedMediumColor
+            FanSpeed.HIGH -> fanSeedMaxColor
+        }
+
         canvas?.drawCircle((width / 2).toFloat(), (height / 2).toFloat(), radius, paint)
 
         //Draw small black circle which will determined the fan speed
